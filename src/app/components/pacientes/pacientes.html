@@ -1,128 +1,85 @@
-<div class="container mt-4">
-  <!-- Header -->
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Gestión de Pacientes</h2>
-    <div *ngIf="user$ | async as user">
-      <span class="me-3">Bienvenido, {{ $any(user).displayName }}</span>
-      <button class="btn btn-outline-danger" (click)="logout()">
-        Cerrar Sesión
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-center mb-5 p-4 bg-white rounded-4 shadow-sm">
+    <div>
+      <h2 class="fw-bold mb-0 text-dark">Gestión de Pacientes</h2>
+      <p class="text-muted mb-0" *ngIf="user$ | async as user">
+        Bienvenido al sistema, <span class="text-primary fw-semibold">{{ $any(user).displayName }}</span>
+      </p>
+    </div>
+    <div *ngIf="user$ | async">
+      <button class="btn btn-outline-danger d-flex align-items-center gap-2" (click)="logout()">
+        <span>Cerrar Sesión</span>
       </button>
     </div>
   </div>
 
-  <!-- Formulario -->
-  <div class="card mb-4">
-    <div class="card-header">
-      <h4>{{ editingId ? 'Editar' : 'Nuevo' }} Paciente</h4>
+  <div class="card border-0 shadow-sm mb-5">
+    <div class="card-header bg-white py-3">
+      <h4 class="mb-0 fw-bold">
+        {{ editingId ? '📝 Editar Información' : '➕ Nuevo Registro' }}
+      </h4>
     </div>
-    <div class="card-body">
+    <div class="card-body p-4">
       <form [formGroup]="pacienteForm" (ngSubmit)="onSubmit()">
-        <div class="row">
-          <!-- Campo Nombre -->
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Nombre *</label>
+        <div class="row g-4">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Nombre(s) *</label>
             <input type="text" 
-                   class="form-control" 
+                   class="form-control form-control-lg" 
+                   placeholder="Escribe aquí el nombre"
                    formControlName="nombre"
-                   [class.is-invalid]="pacienteForm.get('nombre')?.invalid && 
-                                       pacienteForm.get('nombre')?.touched">
-            <div class="invalid-feedback" 
-                 *ngIf="pacienteForm.get('nombre')?.errors?.['required']">
-              El nombre es requerido
-            </div>
-            <div class="invalid-feedback" 
-                 *ngIf="pacienteForm.get('nombre')?.errors?.['minlength']">
-              El nombre debe tener al menos 3 caracteres
-            </div>
-            <div class="invalid-feedback" 
-                 *ngIf="pacienteForm.get('nombre')?.errors?.['maxlength']">
-              El nombre no puede exceder 80 caracteres
-            </div>
-            <div class="invalid-feedback" 
-                 *ngIf="pacienteForm.get('nombre')?.errors?.['pattern']">
-              El nombre solo puede contener letras
-            </div>
+                   [class.is-invalid]="pacienteForm.get('nombre')?.invalid && pacienteForm.get('nombre')?.touched">
+            <div class="invalid-feedback" *ngIf="pacienteForm.get('nombre')?.errors?.['required']">El nombre es obligatorio</div>
+            <div class="invalid-feedback" *ngIf="pacienteForm.get('nombre')?.errors?.['pattern']">Solo se permiten letras</div>
           </div>
 
-                  <!-- Campo Apellidos -->
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Apellidos *</label>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Apellidos *</label>
             <input type="text" 
-                   class="form-control" 
+                   class="form-control form-control-lg" 
+                   placeholder="Escribe aquí el apellido"
                    formControlName="apellidos"
-                   [class.is-invalid]="pacienteForm.get('apellidos')?.invalid && 
-                                       pacienteForm.get('apellidos')?.touched">
-            <div class="invalid-feedback" 
-                 *ngIf="pacienteForm.get('apellidos')?.errors?.['required']">
-              Los apellidos son requeridos
-            </div>
-            <div class="invalid-feedback" 
-                 *ngIf="pacienteForm.get('apellidos')?.errors?.['minlength']">
-              Los apellidos deben tener al menos 3 caracteres
-            </div>
-            <div class="invalid-feedback" 
-                 *ngIf="pacienteForm.get('apellidos')?.errors?.['maxlength']">
-              Los apellidos no pueden exceder 200 caracteres
-            </div>
-            <div class="invalid-feedback" 
-                 *ngIf="pacienteForm.get('apellidos')?.errors?.['pattern']">
-              Los apellidos solo pueden contener letras
-            </div>
+                   [class.is-invalid]="pacienteForm.get('apellidos')?.invalid && pacienteForm.get('apellidos')?.touched">
+            <div class="invalid-feedback">Verifica los apellidos (mín. 3 letras)</div>
           </div>
 
-          <!-- Campo Fecha Nacimiento -->
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Fecha de Nacimiento *</label>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Fecha de Nacimiento *</label>
             <input type="date" 
-                   class="form-control" 
+                   class="form-control form-control-lg" 
                    formControlName="fechaNacimiento"
-                   [class.is-invalid]="pacienteForm.get('fechaNacimiento')?.invalid && 
-                                       pacienteForm.get('fechaNacimiento')?.touched">
-            <div class="invalid-feedback">
-              La fecha de nacimiento es requerida
-            </div>
+                   [class.is-invalid]="pacienteForm.get('fechaNacimiento')?.invalid && pacienteForm.get('fechaNacimiento')?.touched">
+            <div class="invalid-feedback">La fecha es requerida</div>
           </div>
 
-          <!-- Campo Correo Electrónico -->
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Correo Electrónico *</label>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Correo Electrónico *</label>
             <input type="email" 
-                   class="form-control" 
+                   class="form-control form-control-lg" 
+                   placeholder="Escribe aquí el correo"
                    formControlName="correoElectronico"
-                   [class.is-invalid]="pacienteForm.get('correoElectronico')?.invalid && 
-                                       pacienteForm.get('correoElectronico')?.touched">
-            <div class="invalid-feedback" 
-                 *ngIf="pacienteForm.get('correoElectronico')?.errors?.['required']">
-              El correo electrónico es requerido
-            </div>
-            <div class="invalid-feedback" 
-                 *ngIf="pacienteForm.get('correoElectronico')?.errors?.['email']">
-              El correo electrónico no es válido
-            </div>
+                   [class.is-invalid]="pacienteForm.get('correoElectronico')?.invalid && pacienteForm.get('correoElectronico')?.touched">
+            <div class="invalid-feedback">Ingresa un correo válido</div>
           </div>
 
-          <!-- Campo Domicilio -->
-          <div class="col-12 mb-3">
-            <label class="form-label">Domicilio Completo *</label>
-            <textarea class="form-control" 
+          <div class="col-12">
+            <label class="form-label fw-semibold">Domicilio Completo *</label>
+            <textarea class="form-control form-control-lg" 
                       rows="2"
+                      placeholder="Calle, Número, Colonia..."
                       formControlName="domicilio"
-                      [class.is-invalid]="pacienteForm.get('domicilio')?.invalid && 
-                                          pacienteForm.get('domicilio')?.touched">
+                      [class.is-invalid]="pacienteForm.get('domicilio')?.invalid && pacienteForm.get('domicilio')?.touched">
             </textarea>
-            <div class="invalid-feedback">
-              El domicilio es requerido
-            </div>
+            <div class="invalid-feedback">El domicilio es necesario</div>
           </div>
         </div>
 
-        <!-- Botones -->
-        <div class="d-flex gap-2">
-          <button type="submit" class="btn btn-primary">
-            {{ editingId ? 'Actualizar' : 'Guardar' }}
+        <div class="d-flex gap-3 mt-4">
+          <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm">
+            {{ editingId ? 'Actualizar Paciente' : 'Guardar Paciente' }}
           </button>
           <button type="button" 
-                  class="btn btn-secondary" 
+                  class="btn btn-light btn-lg px-4 border" 
                   (click)="resetForm()"
                   *ngIf="editingId">
             Cancelar
@@ -132,45 +89,51 @@
     </div>
   </div>
 
-  <!-- Lista de Pacientes -->
-  <div class="card">
-    <div class="card-header">
-      <h4>Lista de Pacientes ({{ pacientes.length }})</h4>
+  <div class="card border-0 shadow-sm overflow-hidden">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+      <h4 class="mb-0 fw-bold">Lista de Registros</h4>
+      <span class="badge bg-light text-primary border border-primary-subtle px-3 py-2 rounded-pill">
+        {{ pacientes.length }} pacientes en total
+      </span>
     </div>
-    <div class="card-body">
+    <div class="card-body p-0">
       <div class="table-responsive">
-        <table class="table table-striped table-hover">
-          <thead>
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
             <tr>
-              <th>Nombre</th>
-              <th>Apellidos</th>
+              <th class="ps-4">Nombre Completo</th>
               <th>Fecha Nac.</th>
               <th>Domicilio</th>
               <th>Correo</th>
-              <th>Acciones</th>
+              <th class="text-center">Acciones</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let paciente of pacientes">
-              <td>{{ paciente.nombre }}</td>
-              <td>{{ paciente.apellidos }}</td>
+              <td class="ps-4">
+                <div class="fw-bold text-dark">{{ paciente.nombre }}</div>
+                <div class="text-muted small">{{ paciente.apellidos }}</div>
+              </td>
               <td>{{ paciente.fechaNacimiento | date:'dd/MM/yyyy' }}</td>
-              <td>{{ paciente.domicilio }}</td>
-              <td>{{ paciente.correoElectronico | emailFormat }}</td>
+              <td class="text-truncate" style="max-width: 200px;">{{ paciente.domicilio }}</td>
               <td>
-                <button class="btn btn-sm btn-warning me-2" 
-                        (click)="editPaciente(paciente)">
-                  Editar
-                </button>
-                <button class="btn btn-sm btn-danger" 
-                        (click)="deletePaciente(paciente.id)">
-                  Eliminar
-                </button>
+                <span class="text-primary">{{ paciente.correoElectronico | emailFormat }}</span>
+              </td>
+              <td class="text-center pe-4">
+                <div class="d-flex justify-content-center gap-2">
+                  <button class="btn btn-sm btn-warning shadow-sm" (click)="editPaciente(paciente)">
+                    Editar
+                  </button>
+                  <button class="btn btn-sm btn-danger shadow-sm" (click)="deletePaciente(paciente.id)">
+                    Eliminar
+                  </button>
+                </div>
               </td>
             </tr>
             <tr *ngIf="pacientes.length === 0">
-              <td colspan="6" class="text-center">
-                No hay pacientes registrados
+              <td colspan="5" class="text-center py-5 text-muted">
+                <div class="mb-2">📁</div>
+                No hay pacientes registrados actualmente.
               </td>
             </tr>
           </tbody>

@@ -1,13 +1,13 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { 
   Firestore, 
   collection, 
-  addDoc, 
-  collectionData,
-  doc, 
-  updateDoc, 
-  deleteDoc, 
-  query // Asegúrate de que query esté importado
+  query, 
+  onSnapshot, 
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc 
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { Paciente } from '../models/paciente.model';
@@ -16,32 +16,49 @@ import { Paciente } from '../models/paciente.model';
   providedIn: 'root'
 })
 export class PacientesService {
-  private pacientesCollection;
+  private firestore: Firestore = inject(Firestore);
 
-  constructor(private firestore: Firestore) {
-    // Definimos la referencia a la colección una sola vez
-    this.pacientesCollection = collection(this.firestore, 'pacientes');
-  }
-
+  // LISTAR: Obtiene datos en tiempo real y convierte Timestamps a Date
   getPacientes(): Observable<Paciente[]> {
-    // 1. CREAR LA CONSULTA: Transformamos la referencia en un objeto tipo Query
-    const q = query(this.pacientesCollection); 
-    
-    // 2. PASAR LA CONSULTA: Usamos 'q' en lugar de la referencia directa
-    return collectionData(q, { idField: 'id' }) as Observable<Paciente[]>;
+    return new Observable<Paciente[]>((subscriber) => {
+      const colRef = collection(this.firestore, 'pacientes');
+      const q = query(colRef);
+
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const pacientes = snapshot.docs.map((doc) => {
+          const data = doc.data() as any;
+          return {
+            id: doc.id,
+            ...data,
+            fechaNacimiento: data.fechaNacimiento?.toDate 
+              ? data.fechaNacimiento.toDate() 
+              : data.fechaNacimiento
+          } as Paciente;
+        });
+        subscriber.next(pacientes);
+      }, (error) => subscriber.error(error));
+
+      return () => unsubscribe();
+    });
   }
 
+  // AGREGAR
   addPaciente(paciente: Paciente): Promise<any> {
-    return addDoc(this.pacientesCollection, paciente);
+    const colRef = collection(this.firestore, 'pacientes');
+    const { id, ...data } = paciente; 
+    return addDoc(colRef, data);
   }
 
+  // ACTUALIZAR
   updatePaciente(id: string, paciente: Partial<Paciente>): Promise<void> {
-    const pacienteDoc = doc(this.firestore, `pacientes/${id}`);
-    return updateDoc(pacienteDoc, paciente);
+    const docRef = doc(this.firestore, 'pacientes', id);
+    const { id: _, ...data } = paciente;
+    return updateDoc(docRef, data);
   }
 
+  // ELIMINAR
   deletePaciente(id: string): Promise<void> {
-    const pacienteDoc = doc(this.firestore, `pacientes/${id}`);
-    return deleteDoc(pacienteDoc);
+    const docRef = doc(this.firestore, 'pacientes', id);
+    return deleteDoc(docRef);
   }
 }
