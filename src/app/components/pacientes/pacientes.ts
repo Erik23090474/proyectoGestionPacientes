@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
 import { Paciente } from '../../models/paciente.model';
 import { EmailFormatPipe } from '../../pipes/email-format-pipe';
 import { Observable } from 'rxjs';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'app-pacientes',
@@ -14,6 +15,7 @@ import { Observable } from 'rxjs';
   imports: [CommonModule, ReactiveFormsModule, EmailFormatPipe],
   templateUrl: './pacientes.html',
   styleUrls: ['./pacientes.css']
+  
 })
 export class PacientesComponent implements OnInit {
   pacienteForm: FormGroup;
@@ -53,19 +55,27 @@ export class PacientesComponent implements OnInit {
     });
   }
 
-  onSubmit() {
-    if (this.pacienteForm.valid) {
-      const formValue = this.pacienteForm.value;
-      const paciente: Paciente = {
-        ...formValue,
-        fechaNacimiento: new Date(formValue.fechaNacimiento + 'T00:00:00')
-      };
-      this.editingId ? this.updatePaciente(paciente) : this.addPaciente(paciente);
-    } else {
-      this.markFormGroupTouched(this.pacienteForm);
-      alert('⚠️ Por favor, completa todos los campos correctamente.');
-    }
+onSubmit() {
+  if (this.pacienteForm.valid) {
+    const formValue = this.pacienteForm.value;
+
+    // Obtenemos el usuario actual de forma segura para extraer su UID [cite: 15, 18]
+    this.authService.user$.pipe(take(1)).subscribe(user => {
+      if (user) {
+        const paciente: Paciente = {
+          ...formValue,
+          fechaNacimiento: new Date(formValue.fechaNacimiento + 'T00:00:00'),
+          ownerId: user.uid // <-- Aquí guardamos el UID del usuario logueado 
+        };
+
+        this.editingId ? this.updatePaciente(paciente) : this.addPaciente(paciente);
+      }
+    });
+  } else {
+    this.markFormGroupTouched(this.pacienteForm);
+    alert('⚠️ Por favor, completa todos los campos correctamente.');
   }
+}
 
   addPaciente(paciente: Paciente) {
     this.pacientesService.addPaciente(paciente)

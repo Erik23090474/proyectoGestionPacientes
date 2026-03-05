@@ -5,4 +5,5 @@ export interface Paciente {
   fechaNacimiento: Date;
   domicilio: string;
   correoElectronico: string;
+  ownerId: string;
 }
